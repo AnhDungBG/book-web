@@ -1,0 +1,35 @@
+services:
+
+  django_gunicorn:
+    build:
+      context: ./backend
+    command: gunicorn BookWebsite.wsgi:application --bind 0.0.0.0:99
+    volumes:
+      - django_static:/app/staticfiles
+    env_file:
+      - ./backend/.env.prod
+    ports:
+      - "99:99"
+    working_dir:
+      /app
+    depends_on:
+        redis:
+          condition: service_started
+
+  redis:
+    image: redis:alpine
+    restart: always
+  front_end:
+    build: 
+      context: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - django_gunicorn
+
+
+  
+volumes:
+  django_static:
+  nginx_static:
+  mysql_data:
